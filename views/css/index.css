@@ -1,0 +1,63 @@
+html, body
+{
+	height: 100%;
+	margin: 0;
+	padding: 0;
+}
+
+#controller
+{
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 50px;
+}
+
+#mapPane
+{
+	position: absolute;
+	top: 50px;
+	left: 0;
+	right: 0;
+	bottom: 50px;
+}
+
+#map
+{
+	width: 100%;
+	height: 100%;	
+}
+
+#chatPane
+{
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	height: 50px;
+}
+
+#chatPane input
+{
+	width: 100%;
+	height: 100%;
+	padding: 10px;
+	font-size: 13px;
+	margin:0;
+	
+	border-radius: 5px;
+	border: 1px solid #444;
+	
+	box-sizing: border-box;
+}
+
+.message-marker
+{
+	position: absolute;
+	border: 1px solid #666;
+	border-radius: 5px;
+	padding: 5px 10px;
+	font-size: 15px;
+	background-color: white;
+}
