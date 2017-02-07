@@ -7,6 +7,7 @@
     "body-parser": "*",
     "express": "*",
     "method-override": "*",
+    "mongoose": "^4.8.1",
     "nodejs-imp": "*"
   },
   "author": "Alprensia"

@@ -1,0 +1,47 @@
+.component-message
+{
+	position: absolute;
+	width: 150px;
+	
+	background-color: white;
+	
+	border: 1px solid #aaa;
+	border-radius: 5px;
+	
+	box-shadow: 0 0 1px 0px rgba(34,35,35,0.97);
+	
+	font-size:0;
+}
+
+.component-message > .image-pane
+{
+	display: inline-block;
+	
+	width: 30%;
+	padding: 10px;
+	
+	box-sizing: border-box;
+	
+	vertical-align: middle;
+}
+
+.component-message > .image-pane > img
+{
+	width: 100%;
+	border-radius: 5px;
+}
+
+.component-message > .message-pane
+{
+	display: inline-block;
+	
+	width: 70%;
+	padding: 10px;
+	
+	font-size: 15px;
+	color: #676767;
+	
+	box-sizing: border-box;
+	
+	vertical-align: middle;
+}

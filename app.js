@@ -90,3 +90,12 @@ process.on('uncaughtException', function (err)
 
 var routerLoader = require(_path.libs + '/RouterLoader');
 routerLoader(_path.controller + '/routers');
+
+var mongoose    = require('mongoose');
+var db = mongoose.connection;
+db.on('error', console.error);
+db.once('open', function(){
+	console.log("Connected to mongod server");
+});
+
+mongoose.connect('mongodb://localhost/nearbychat');
