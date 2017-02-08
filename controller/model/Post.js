@@ -1,10 +1,9 @@
-var mongoose = require('mongoose');
-var Schema = mongoose.Schema;
+var Schema = global.mongoose.Schema;
  
 var Post = new Schema({
     content: String,
     author: String,
-    latLng : String,
+    location : String,
     zone : Number,
     point: {type : Number, default: 0},
     published_date: { type: Date, default: Date.now }

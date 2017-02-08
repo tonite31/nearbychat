@@ -1,0 +1,12 @@
+.do-progress
+{
+	animation-name: progress;
+    animation-duration: 2s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+}
+
+@keyframes progress {
+    from {transform: rotate(0deg);}
+    to {transform: rotate(360deg);}
+}

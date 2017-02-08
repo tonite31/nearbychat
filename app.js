@@ -4,6 +4,7 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 var methodOverride = require('method-override');
+var session = require('express-session');
 
 /**
  * set global variables
@@ -59,7 +60,14 @@ app.use('/views', express.static(_path.views));
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
 app.use(methodOverride());
+app.use(session({ secret: 'halloween', resave: true, saveUninitialized: true, cookie: {expires: new Date(Date.now() + 60 * 60 * 2 * 1000), maxAge: 60 * 60 * 2 * 1000}}));
 app.use(imp.render);
+app.use(function(req, res, next)
+{
+	res.header("Access-Control-Allow-Origin", "*");
+	res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+	next();
+});
 
 /**
  * error handling
@@ -88,10 +96,8 @@ process.on('uncaughtException', function (err)
 	console.error('=================================================\n\n');
 });
 
-var routerLoader = require(_path.libs + '/RouterLoader');
-routerLoader(_path.controller + '/routers');
-
-var mongoose    = require('mongoose');
+var mongoose = global.mongoose = require('mongoose');
+mongoose.Promise = require('bluebird');
 var db = mongoose.connection;
 db.on('error', console.error);
 db.once('open', function(){
@@ -99,3 +105,6 @@ db.once('open', function(){
 });
 
 mongoose.connect('mongodb://localhost/nearbychat');
+
+var routerLoader = require(_path.libs + '/RouterLoader');
+routerLoader(_path.controller + '/routers');
