@@ -6,6 +6,7 @@
   "dependencies": {
     "bluebird": "^3.4.7",
     "body-parser": "*",
+    "connect-multiparty": "^2.0.0",
     "express": "*",
     "express-session": "^1.15.0",
     "method-override": "*",

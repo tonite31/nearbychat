@@ -1,12 +1,11 @@
 var Schema = global.mongoose.Schema;
  
 var Post = new Schema({
+	subject: String,
     content: String,
     author: String,
-    location : String,
-    zone : Number,
-    point: {type : Number, default: 0},
-    published_date: { type: Date, default: Date.now }
+    published_date: { type: Date, default: Date.now },
+    isOwn: Boolean
 });
  
 module.exports = mongoose.model('Post', Post);

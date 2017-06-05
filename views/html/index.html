@@ -3,48 +3,139 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+<meta name='viewport' content='width=device-width' />  
 <meta charset="UTF-8" />  	
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-<link rel="stylesheet" href="@{css/index.css}">
-<link rel="stylesheet" href="@{css/component.css}">
+<link rel="stylesheet" href="@{js/libs/bootstrap/bootstrap.min.css}">
 
-<script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-<script src="@{js/index.js}"></script>
-<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBHPnhIYBspkJFCHDRx2UiWpWtFEv6I5d8&callback=mapReady"></script>
-<script src="@{js/component/post.js}"></script>
-<script src="@{js/component/profile.js}"></script>
+<style>
+.list-table
+{
+	width: 100%;
+	background-color: white;
+}
+
+.list-table th
+{
+	padding: 10px;
+	font-size: 13px;
+	border: 1px solid #dfdfdf;
+	text-align: center;
+}
+
+.list-table td
+{
+	padding: 10px;
+	font-size: 13px;
+	border: 1px solid #dfdfdf;
+}
+
+.list-table .left
+{
+	text-align: left;
+}
+
+.list-table .center
+{
+	text-align: center;
+}
+
+.list-table .right
+{
+	text-align: right;
+}
+
+.list-table input[type='text'], input[type='number']
+{
+	padding: 5px;
+}
+
+.author, .published-date
+{
+	text-align: center;
+}
+</style>
+
+<script src="@{js/libs/jquery/jquery-3.1.1.min.js}"></script>
+<script src="@{js/libs/jquery/jquery-3.1.1.min.js}"></script>
+
+<script type="text/template" id="listItemTemplate">
+<tr>
+	<td><a href="/article?_id={_id}">{subject}</a></td>
+	<td class="author">{author}</td>
+	<td class="published-date">{published_date}</td>
+</tr>
+</script>
+
+<script>
+$(document).ready(function()
+{
+	$.ajax({url : '/api/posts'}).done(function(data)
+	{
+		var template = $('#listItemTemplate').html();
+		var html = '';
+		for(var i=0; i<data.length; i++)
+		{
+			var t = template;
+			for(var key in data[i])
+			{
+				if(key == 'published_date')
+				{
+					var date = new Date(data[i][key]);
+					console.dir(date);
+					
+					var year = date.getFullYear();
+					var months = date.getMonth() + 1;
+					var dayOfMonth = date.getDate();
+					var hour = date.getHours();
+					var min = date.getMinutes();
+					var sec = date.getSeconds();
+					
+					months = months > 10 ? months : '0' + months;
+					dayOfMonth = dayOfMonth > 10 ? dayOfMonth : '0' + dayOfMonth;
+					hour = hour > 10 ? hour : '0' + hour;
+					min = min > 10 ? min : '0' + min;
+					sec = sec > 10 ? sec : '0' + sec;
+					
+					data[i][key] = year + '-' + months + '-' + dayOfMonth + ' ' + hour + ':' + min + ':' + sec;
+				}					
+				
+				t = t.replace('{' + key + '}', data[i][key]);
+			}
+			
+			html += t;
+		}
+		
+		$('#articleList').html(html);
+	}).fail(function(error)
+	{
+		$('#mainContainer').html(error);
+	});
+});
+</script>
+
 </head>
 <body>
-<div id="controller">
+<div class="container" style="margin-top: 50px;" id="mainContainer">
+	<div style="margin: 10px 0; text-align: right;">
+		<a class="btn btn-default" href="/write">글쓰기</a>
+		<a class="btn btn-default" href="/logout">로그아웃</a>
+	</div>
+	<table class="list-table">
+		<colgroup>
+			<col style="width: 60%;">
+			<col style="width: 20%;">
+			<col style="width: 20%;">
+		</colgroup>
+		<thead>
+			<tr>
+				<th>제목</th>
+				<th>작성자</th>
+				<th>작성일</th>
+			</tr>
+		</thead>
+		<tbody id="articleList">
+		</tbody>
+	</table>
 </div>
-<div id="mapPane">
-	<div id="map"></div>
-</div>
-<div id="chatPane">
-	<input id="chatInput" type="text" autofocus="autofocus">
-</div>
-
-
-<div class="modal fade" tabindex="-1" role="dialog" id="postModal">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title">Modal title</h4>
-      </div>
-      <div class="modal-body">
-        <textarea placeholder="#tag" id="content"></textarea>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal" id="closePost">Close</button>
-        <button type="button" class="btn btn-primary" id="savePost">Save changes</button>
-      </div>
-    </div><!-- /.modal-content -->
-  </div><!-- /.modal-dialog -->
-</div><!-- /.modal -->
-
-
-
 </body>
 </html>

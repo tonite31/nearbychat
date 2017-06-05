@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+<meta name='viewport' content='width=device-width' />  
+<meta charset="UTF-8" />  	
+<link rel="stylesheet" href="@{js/libs/bootstrap/bootstrap.min.css}">
+<link rel="stylesheet" href="@{css/index.css}">
+<link rel="stylesheet" href="@{css/component.css}">
+
+<script src="@{js/libs/jquery/jquery-3.1.1.min.js}"></script>
+<script src="@{js/libs/jquery/jquery.form.js}"></script>
+<script src="@{js/libs/common.js}"></script>
+
+<style>
+#subject
+{
+	padding: 15px 10px;
+	border: 1px solid #ddd;
+	border-radius: 5px;
+	width: 100%;
+	font-size: 20px;
+}
+
+#content
+{
+	margin: 10px 0;
+	border-radius: 5px;
+	border: 1px solid #ddd;
+	min-height: 500px;
+	padding: 10px;
+}
+</style>
+
+<script>
+var currentPostId = getParameterByName('_id');
+
+$(document).ready(function()
+{
+	if(currentPostId)
+	{
+		$.ajax({url : '/api/posts/' + currentPostId}).done(function(data)
+		{
+			if(!data.isOwn)
+				location.href = '/index';
+			
+			$('#subject').val(data.subject);
+			$('#content').html(data.content);
+		}).fail(function(error)
+		{
+			$('.container').html(error);
+		});
+	}
+	
+	
+	$('#uploadPhoto').on('click', function()
+	{
+		$('#photoInput').click();
+	});
+
+	$('#photoInput').on('change', function(e)
+	{
+		var formData = new FormData($('#uploadForm')[0]);
+        $.ajax({
+           url: '/api/posts/files',
+           processData: false,
+           contentType: false,
+           data: formData,
+           type: 'POST',
+           success: function(result)
+           {
+        	   $('#content').append('<div><img src="' + result + '" style="max-width: 100%;"></div>');
+           }
+       });
+	});
+	
+	$('#save').on('click', function()
+	{
+		var subject = $('#subject').val();
+		var content = $('#content').html();
+		
+		$.ajax({url : '/api/posts' + (currentPostId ? '/' + currentPostId : ''), type: (currentPostId ? 'put' : 'post'), data : {subject: subject, content: content}}).done(function()
+		{
+			location.href = '/index';
+		}).fail(function(error)
+		{
+			$('#save').parent().html(error);
+			alert('저장실패!');	
+		});
+	});
+});
+</script>
+
+</head>
+<body>
+<div class="container" style="margin-top: 50px;">
+	<h1>글쓰기</h1>
+	<div style="margin: 20px 0; text-align: right;">
+		<button type="button" class="btn btn-default" id="uploadPhoto">사진</button>
+		<form style="opacity:0; position: absolute; left: -10000px;" id="uploadForm">
+			<input type="file" name="photo" id="photoInput">
+		</form>
+	</div>
+	<input type="text" id="subject" placeholder="제목">
+	<div contenteditable="true" id="content"></div>
+	<div style="text-align: right;">
+		<button type="button" class="btn btn-primary" id="save">저장</button>
+	</div>
+</div>
+</body>
+</html>

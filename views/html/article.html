@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+<meta name='viewport' content='width=device-width' />  
+<meta charset="UTF-8" />  	
+<link rel="stylesheet" href="@{js/libs/bootstrap/bootstrap.min.css}">
+<link rel="stylesheet" href="@{css/index.css}">
+<link rel="stylesheet" href="@{css/component.css}">
+
+<script src="@{js/libs/jquery/jquery-3.1.1.min.js}"></script>
+<script src="@{js/libs/jquery/jquery.form.js}"></script>
+<script src="@{js/libs/common.js}"></script>
+
+<style>
+#subject small
+{
+	font-size: 15px;
+	color: #777;
+}
+</style>
+
+<script>
+var id = getParameterByName('_id');
+$(document).ready(function()
+{
+	$('#update').get(0).href += id;
+	
+	$.ajax({url: '/api/posts/' + id}).done(function(data)
+	{
+		if(!data.isOwn)
+		{
+			$('#update').remove();
+			$('#delete').remove();
+		}
+		
+		$('#content').html(data.content);
+		$('#subject').html(data.subject + ' <small>' + data.author + '</small>');
+	}).fail(function(error)
+	{
+		$('.container').html(error);
+	});
+	
+	$('#delete').on('click', function()
+	{
+		if(confirm('정말 삭제하시겠습니까?'))
+		{
+			$.ajax({url : '/api/posts/' + id, type: 'delete'}).done(function()
+			{
+				location.href = '/index';
+			}).fail(function(error)
+			{
+				$('.container').html(error);
+			});
+		}
+	});
+});
+</script>
+
+</head>
+<body>
+<div class="container" style="margin-top: 50px;">
+	<h1 id="subject"></h1>
+	<div style="margin: 20px 0; text-align: right;">
+		<a href="/write?_id=" class="btn btn-default" id="update">수정</a>
+		<button type="button" class="btn btn-danger" id="delete">삭제</button>
+	</div>
+	<div id="content"></div>
+</div>
+</body>
+</html>

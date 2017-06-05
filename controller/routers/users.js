@@ -1,5 +1,6 @@
 module.exports = function(app)
 {
+	var Post = require(_path.controller + '/model/Post');
 	var User = require(_path.controller + '/model/User');
 	
 	app.post('/auth/signin', function(req, res, next)
@@ -91,6 +92,7 @@ module.exports = function(app)
 	        		item[key] = req.body[key];
 	        }
 	 
+	        //게시글의 작성자를 모두 바꿔줘야 한다.
 	        user.save(function(err)
 	        {
 	        	if(err)

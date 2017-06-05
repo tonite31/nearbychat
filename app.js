@@ -14,7 +14,8 @@ global._path =
 	home : __dirname,
 	controller : __dirname + '/controller',
 	views : __dirname + '/views',
-	libs : __dirname + '/libs'
+	libs : __dirname + '/libs',
+	uploads : __dirname + '/uploads'
 };
 
 /**
@@ -53,6 +54,7 @@ imp.addRenderModule(Renderer.replacePath);
  * set static dirs
  */
 app.use('/views', express.static(_path.views));
+app.use('/uploads', express.static(_path.uploads));
 
 /**
  * set middleware
@@ -62,12 +64,6 @@ app.use(bodyParser.json());
 app.use(methodOverride());
 app.use(session({ secret: 'halloween', resave: true, saveUninitialized: true, cookie: {expires: new Date(Date.now() + 60 * 60 * 2 * 1000), maxAge: 60 * 60 * 2 * 1000}}));
 app.use(imp.render);
-app.use(function(req, res, next)
-{
-	res.header("Access-Control-Allow-Origin", "*");
-	res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-	next();
-});
 
 /**
  * error handling
