@@ -71,6 +71,16 @@ $(document).ready(function()
 {
 	$.ajax({url : '/api/posts'}).done(function(data)
 	{
+		console.log(data.sort);
+		
+		data = data.sort(function(a, b)
+		{
+			var date_a = new Date(a.published_date);
+			var date_b = new Date(b.published_date);
+			
+			return date_a.getTime() < date_b.getTime();
+		});
+		
 		var template = $('#listItemTemplate').html();
 		var html = '';
 		for(var i=0; i<data.length; i++)

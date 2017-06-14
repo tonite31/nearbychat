@@ -19,7 +19,81 @@
 	font-size: 15px;
 	color: #777;
 }
+
+#point-container
+{
+	margin: 10px 0;
+	border: 1px solid #ddd;
+	padding: 15px;
+}
+
+#comment-container
+{
+	margin-top: 30px 0;
+}
+
+#comment-container .panel
+{
+	padding: 15px;
+	font-size: 15px;
+	margin-bottom: 5px;
+}
+
+.point-average
+{
+	font-size: 17px;
+}
+
+.comment-author, .point-average
+{
+	display: block;
+	padding-bottom: 10px;
+	
+	border-bottom: 1px solid #ddd;
+	font-weight: bold;
+}
+
+.comment-content, .point-person
+{
+	display: block;
+	padding-top: 10px;
+}
+
+#write-point 
+{
+	padding: 10px 0;
+	border-top: 1px solid #ddd;
+}
+
+#write-point select
+{
+	padding: 10px;
+	vertical-align: middle;
+}
+
+.point-list
+{
+	padding: 20px 0;
+	font-size: 12px;
+}
+
+#save-comment
+{
+	cursor: pointer;
+}
+
+#save-comment:HOVER
+{
+	font-weight: bold;
+}
 </style>
+
+<template id="comment-item-template">
+<div class="panel panel-default">
+	<span class="comment-author">{author}</span>
+	<span class="comment-content">{content}</span>
+</div>
+</template>
 
 <script>
 var id = getParameterByName('_id');
@@ -55,6 +129,56 @@ $(document).ready(function()
 			});
 		}
 	});
+	
+	$.ajax({url : '/api/comments/' + id}).done(function(data)
+	{
+		var template = $('#comment-item-template').html();
+		
+		if(data.length > 0)
+		{
+		
+		}
+		else
+		{
+			var e = $(template);
+			e.html('덧글이 없습니다');
+			$('#comment-container').prepend(e);
+		}
+	}).fail(function(error)
+	{
+		$('.container').html(error);
+	});
+	
+	$.ajax({url : '/api/points/' + id}).done(function(data)
+	{
+		if(data.length > 0)
+		{
+// 			<div class="point-person">Alprensia - 9점</div>
+			for(var i=0; i<data.length; i++)
+			{
+			}
+		}
+		else
+		{
+			$('.point-average').html('☆☆☆☆☆ (0점)');
+			$('.point-list').html('입력된 점수가 없습니다');
+		}
+	}).fail(function(error)
+	{
+		$('.container').html(error);
+	});
+	
+	$('#save-comment').on('click', function()
+	{
+		var content = $(this).prev().val();
+		if(!content)
+		{
+			alert('덧글을 입력해주세요');
+			return;
+		}
+		
+		//ajax call
+	});
 });
 </script>
 
@@ -67,6 +191,35 @@ $(document).ready(function()
 		<button type="button" class="btn btn-danger" id="delete">삭제</button>
 	</div>
 	<div id="content"></div>
+	<div id="point-container">
+		<div class="point-average"></div>
+		<div class="point-list"></div>
+		<div id="write-point">
+			<select>
+				<option selected>10점</option>
+				<option>9점</option>
+				<option>8점</option>
+				<option>7점</option>
+				<option>6점</option>
+				<option>5점</option>
+				<option>4점</option>
+				<option>3점</option>
+				<option>2점</option>
+				<option>1점</option>
+				<option>0점</option>
+			</select>
+			<button type="button" class="btn btn-default" id="save-point">점수입력</button>
+			<small>다시 입력하면 수정됩니다.</small>
+		</div>
+	</div>
+	<div id="comment-container">
+		<div id="write-comment">
+			<div class="input-group">
+				<input type="text" class="form-control" placeholder="덧글입력" aria-describedby="basic-addon2">
+				<span class="input-group-addon" id="save-comment">저장</span>
+			</div>
+		</div>
+	</div>
 </div>
 </body>
 </html>
