@@ -63,6 +63,7 @@
 {
 	padding: 10px 0;
 	border-top: 1px solid #ddd;
+	display: none;
 }
 
 #write-point select
@@ -74,7 +75,6 @@
 .point-list
 {
 	padding: 20px 0;
-	font-size: 12px;
 }
 
 #save-comment
@@ -85,6 +85,17 @@
 #save-comment:HOVER
 {
 	font-weight: bold;
+}
+
+.point-fold
+{
+	display: block;
+	padding-top: 10px;
+	cursor: pointer;
+}
+.point-fold:HOVER
+{
+	text-decoration: underline;
 }
 </style>
 
@@ -130,43 +141,8 @@ $(document).ready(function()
 		}
 	});
 	
-	$.ajax({url : '/api/comments/' + id}).done(function(data)
-	{
-		var template = $('#comment-item-template').html();
-		
-		if(data.length > 0)
-		{
-		
-		}
-		else
-		{
-			var e = $(template);
-			e.html('덧글이 없습니다');
-			$('#comment-container').prepend(e);
-		}
-	}).fail(function(error)
-	{
-		$('.container').html(error);
-	});
-	
-	$.ajax({url : '/api/points/' + id}).done(function(data)
-	{
-		if(data.length > 0)
-		{
-// 			<div class="point-person">Alprensia - 9점</div>
-			for(var i=0; i<data.length; i++)
-			{
-			}
-		}
-		else
-		{
-			$('.point-average').html('☆☆☆☆☆ (0점)');
-			$('.point-list').html('입력된 점수가 없습니다');
-		}
-	}).fail(function(error)
-	{
-		$('.container').html(error);
-	});
+	bindComments();
+	bindPoints();	
 	
 	$('#save-comment').on('click', function()
 	{
@@ -178,8 +154,103 @@ $(document).ready(function()
 		}
 		
 		//ajax call
+		$.ajax({url : '/api/comments', type: 'post', data : {postId : id, content : content}}).done(function(data)
+		{
+			var template = $('#comment-item-template').html();
+			$('#comment-container').prepend(template.replace('{content}', data.content).replace('{author}', data.author));
+		}).fail(function(error)
+		{
+			alert('작성실패');
+			console.error(error);
+		});
+	});
+	
+	$('.point-fold').on('click', function()
+	{
+		$(this).hide().next().show();	
+	});
+	
+	$('#save-point').on('click', function()
+	{
+		var point = $('#write-point select').val();
+		$.ajax({url : '/api/points/', type: 'put', data : {postId : id, point : point}}).done(function(data)
+		{
+			bindPoints();
+		}).fail(function(error)
+		{
+			alert('입력실패');
+			console.error(error);
+		});
 	});
 });
+
+function bindPoints()
+{
+	$('.point-list').html('');
+	$.ajax({url : '/api/points/' + id}).done(function(data)
+	{
+		if(data.length > 0)
+		{
+			var sum = 0;
+			for(var i=0; i<data.length; i++)
+			{
+				$('.point-list').append('<div class="point-person">' + data[i].author + ' - ' + data[i].point + '점</div>');
+				sum += data[i].point;
+			}
+			
+			var star = '';
+			var average = sum / data.length;
+			for(var i=1; i<average/2; i++)
+			{
+				star += '★';
+			}
+			
+			console.log('흠 : ', average/2, 5-average/2);
+			for(var i=0; i<5-average/2; i++)
+			{
+				star += '☆';
+			}
+			
+			$('.point-average').html(star + ' (' + average + '점)');
+		}
+		else
+		{
+			$('.point-average').html('☆☆☆☆☆ (0점)');
+			$('.point-list').html('입력된 점수가 없습니다');
+		}
+	}).fail(function(error)
+	{
+		$('.container').html(error);
+	});	
+}
+
+function bindComments()
+{
+	$.ajax({url : '/api/comments/' + id}).done(function(data)
+	{
+		var template = $('#comment-item-template').html();
+		
+		if(data.length > 0)
+		{
+			var html = '';
+			for(var i=0; i<data.length; i++)
+			{
+				html += template.replace('{content}', data[i].content).replace('{author}', data[i].author);				
+			}
+			
+			$('#comment-container').prepend(html);
+		}
+		else
+		{
+			var e = $(template);
+			e.html('덧글이 없습니다');
+			$('#comment-container').prepend(e);
+		}
+	}).fail(function(error)
+	{
+		$('.container').html(error);
+	});	
+}
 </script>
 
 </head>
@@ -189,24 +260,26 @@ $(document).ready(function()
 	<div style="margin: 20px 0; text-align: right;">
 		<a href="/write?_id=" class="btn btn-default" id="update">수정</a>
 		<button type="button" class="btn btn-danger" id="delete">삭제</button>
+		<a href="/" class="btn btn-default">목록으로</a>
 	</div>
 	<div id="content"></div>
 	<div id="point-container">
 		<div class="point-average"></div>
 		<div class="point-list"></div>
+		<span class="point-fold">점수입력</span>
 		<div id="write-point">
 			<select>
-				<option selected>10점</option>
-				<option>9점</option>
-				<option>8점</option>
-				<option>7점</option>
-				<option>6점</option>
-				<option>5점</option>
-				<option>4점</option>
-				<option>3점</option>
-				<option>2점</option>
-				<option>1점</option>
-				<option>0점</option>
+				<option value="10" selected>10점</option>
+				<option value="9">9점</option>
+				<option value="8">8점</option>
+				<option value="7">7점</option>
+				<option value="6">6점</option>
+				<option value="5">5점</option>
+				<option value="4">4점</option>
+				<option value="3">3점</option>
+				<option value="2">2점</option>
+				<option value="1">1점</option>
+				<option value="0">0점</option>
 			</select>
 			<button type="button" class="btn btn-default" id="save-point">점수입력</button>
 			<small>다시 입력하면 수정됩니다.</small>

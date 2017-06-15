@@ -10,7 +10,14 @@ module.exports = function(app)
 		{
 			if(req.session.user)
 			{
-				callback(req, res, next);
+				try
+				{
+					callback(req, res, next);
+				}
+				catch(err)
+				{
+					console.log(err.stack);
+				}
 			}
 			else
 			{
@@ -32,49 +39,64 @@ module.exports = function(app)
 	    });
 	}));
 	
-	app.post('/api/points', checkLogin(function(req, res, next)
-	{
-		var post = new Point(req.body);
-		post.author = req.session.user.username;
-		
-		post.save(function(err)
-	    {
-            if(err)
-            	return res.status(500).send({error: err});
-            
-	        res.status(201).send(post);
-	    });
-	}));
+//	app.post('/api/points', checkLogin(function(req, res, next)
+//	{
+//		var post = new Point(req.body);
+//		post.author = req.session.user.username;
+//		
+//		post.save(function(err)
+//	    {
+//            if(err)
+//            	return res.status(500).send({error: err});
+//            
+//	        res.status(201).send(post);
+//	    });
+//	}));
 	
-	app.put('/api/points/:id', checkLogin(function(req, res, next)
+	app.put('/api/points', checkLogin(function(req, res, next)
 	{
-		Point.findById(req.params.id, function(err, item)
+		Point.find({postId : req.body.postId, author : req.session.user.username}, function(err, item)
 		{
 			if(err)
 				return res.status(500).send({error: err});
 			
-	        if(!item)
-	        	return res.status(404);
-	        
-	        if(req.session.user.username == item.author)
+	        if(!item || item.length <= 0)
 	        {
-	        	for(var key in req.body)
-		        {
-		        	if(Point.schema.tree.hasOwnProperty(key))
-		        		item[key] = req.body[key];
-		        }
-		 
-		        item.save(function(err)
-		        {
-		        	if(err)
-		        		return res.status(500).send({error: err});
-		        	
-		            res.status(200).end();
-		        });
+	        	var point = new Point(req.body);
+	        	point.author = req.session.user.username;
+	        	point.isOwn = true;
+	        	
+	        	point.save(function(err)
+    		    {
+    	            if(err)
+    	            	return res.status(500).send({error: err});
+    	            
+    		        res.status(201).send(point);
+    		    });
 	        }
 	        else
 	        {
-	        	res.status(401).end();
+	        	item = item[0];
+	        	if(req.session.user.username == item.author)
+		        {
+		        	for(var key in req.body)
+			        {
+			        	if(Point.schema.tree.hasOwnProperty(key))
+			        		item[key] = req.body[key];
+			        }
+		        	
+			        item.save(function(err)
+			        {
+			        	if(err)
+			        		return res.status(500).send({error: err});
+			        	
+			            res.status(200).end();
+			        });
+		        }
+		        else
+		        {
+		        	res.status(401).end();
+		        }
 	        }
 	    });
 	}));

@@ -34,15 +34,16 @@ module.exports = function(app)
 	
 	app.post('/api/comments', checkLogin(function(req, res, next)
 	{
-		var post = new Comment(req.body);
-		post.author = req.session.user.username;
+		var comment = new Comment(req.body);
+		comment.author = req.session.user.username;
+		comment.isOwn = true;
 		
-		post.save(function(err)
+		comment.save(function(err)
 	    {
             if(err)
             	return res.status(500).send({error: err});
             
-	        res.status(201).send(post);
+	        res.status(201).send(comment);
 	    });
 	}));
 	
