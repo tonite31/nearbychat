@@ -44,6 +44,14 @@
 	font-size: 17px;
 }
 
+.comment-author small
+{
+	font-weight: normal;
+	font-size: 12px;
+	float: right;
+	margin-top: 5px;
+}
+
 .comment-author, .point-average
 {
 	display: block;
@@ -101,7 +109,7 @@
 
 <template id="comment-item-template">
 <div class="panel panel-default">
-	<span class="comment-author">{author}</span>
+	<span class="comment-author">{author} <small>{published_date}</small></span>
 	<span class="comment-content">{content}</span>
 </div>
 </template>
@@ -157,7 +165,7 @@ $(document).ready(function()
 		$.ajax({url : '/api/comments', type: 'post', data : {postId : id, content : content}}).done(function(data)
 		{
 			var template = $('#comment-item-template').html();
-			$('#comment-container').prepend(template.replace('{content}', data.content).replace('{author}', data.author));
+			$('#comment-container').prepend(template.replace('{content}', data.content).replace('{author}', data.author).replace('{published_date}', getDate(data.published_date)));
 		}).fail(function(error)
 		{
 			alert('작성실패');
@@ -232,10 +240,11 @@ function bindComments()
 		
 		if(data.length > 0)
 		{
+			console.log(data);
 			var html = '';
 			for(var i=0; i<data.length; i++)
 			{
-				html += template.replace('{content}', data[i].content).replace('{author}', data[i].author);				
+				html += template.replace('{content}', data[i].content).replace('{author}', data[i].author).replace('{published_date}', getDate(data[i].published_date));				
 			}
 			
 			$('#comment-container').prepend(html);
@@ -250,6 +259,25 @@ function bindComments()
 	{
 		$('.container').html(error);
 	});	
+}
+
+function getDate(d)
+{
+	var date = new Date(d);
+	var year = date.getFullYear();
+	var months = date.getMonth() + 1;
+	var dayOfMonth = date.getDate();
+	var hour = date.getHours();
+	var min = date.getMinutes();
+	var sec = date.getSeconds();
+	
+	months = months > 10 ? months : '0' + months;
+	dayOfMonth = dayOfMonth > 10 ? dayOfMonth : '0' + dayOfMonth;
+	hour = hour > 10 ? hour : '0' + hour;
+	min = min > 10 ? min : '0' + min;
+	sec = sec > 10 ? sec : '0' + sec;
+	
+	return year + '-' + months + '-' + dayOfMonth + ' ' + hour + ':' + min + ':' + sec;
 }
 </script>
 
