@@ -30,6 +30,7 @@
 #comment-container
 {
 	margin-top: 30px 0;
+	margin-bottom: 100px;
 }
 
 #comment-container .panel
@@ -44,12 +45,23 @@
 	font-size: 17px;
 }
 
-.comment-author small
+.comment-author small, .comment-author .modify, .comment-author .delete
 {
 	font-weight: normal;
 	font-size: 12px;
 	float: right;
 	margin-top: 5px;
+	margin-right: 5px;
+}
+
+.comment-author .modify, .comment-author .delete
+{
+	cursor: pointer;
+}
+
+.comment-author .modify:HOVER, .comment-author .delete:HOVER
+{
+	text-decoration: underline;
 }
 
 .comment-author, .point-average
@@ -85,12 +97,12 @@
 	padding: 20px 0;
 }
 
-#save-comment
+#save-comment, #comment-container .input-group-addon
 {
 	cursor: pointer;
 }
 
-#save-comment:HOVER
+#save-comment:HOVER, #comment-container .input-group-addon:hover
 {
 	font-weight: bold;
 }
@@ -109,7 +121,7 @@
 
 <template id="comment-item-template">
 <div class="panel panel-default">
-	<span class="comment-author">{author} <small>{published_date}</small></span>
+	<span class="comment-author">{author} {function} <small>{published_date}</small></span>
 	<span class="comment-content">{content}</span>
 </div>
 </template>
@@ -164,8 +176,9 @@ $(document).ready(function()
 		//ajax call
 		$.ajax({url : '/api/comments', type: 'post', data : {postId : id, content : content}}).done(function(data)
 		{
-			var template = $('#comment-item-template').html();
-			$('#comment-container').prepend(template.replace('{content}', data.content).replace('{author}', data.author).replace('{published_date}', getDate(data.published_date)));
+			$('#comment-container .panel').remove();
+			bindComments();
+			$('#write-comment input').val('');
 		}).fail(function(error)
 		{
 			alert('작성실패');
@@ -208,13 +221,15 @@ function bindPoints()
 			
 			var star = '';
 			var average = sum / data.length;
-			for(var i=1; i<average/2; i++)
+			console.log('평균 : ', average, average/2);
+			
+			var i=1;
+			for(; i<=average/2; i++)
 			{
 				star += '★';
 			}
 			
-			console.log('흠 : ', average/2, 5-average/2);
-			for(var i=0; i<5-average/2; i++)
+			for(; i<=5; i++)
 			{
 				star += '☆';
 			}
@@ -240,14 +255,64 @@ function bindComments()
 		
 		if(data.length > 0)
 		{
-			console.log(data);
 			var html = '';
 			for(var i=0; i<data.length; i++)
 			{
-				html += template.replace('{content}', data[i].content).replace('{author}', data[i].author).replace('{published_date}', getDate(data[i].published_date));				
+				console.log("머지 : ", data[i].isOwn);
+				var t = template.replace('{content}', data[i].content).replace('{author}', data[i].author).replace('{published_date}', getDate(data[i].published_date));
+				if(!data[i].isOwn)
+				{
+					t = t.replace('{function}', '');
+				}
+				else
+				{
+					t = t.replace('{function}', '<span class="delete" data-id="' + data[i]._id + '">삭제</span> <span class="modify" data-id="' + data[i]._id + '">수정</span>');
+				}
+					
+				html += t;
 			}
 			
 			$('#comment-container').prepend(html);
+			
+			$('.comment-author .modify').on('click', function()
+			{
+				var _id = $(this).attr('data-id');
+				var content = $(this).parent().parent().find('.comment-content');
+				
+				var text = content.html();
+				content.html('<div class="input-group"><input type="text" class="form-control" placeholder="덧글입력" aria-describedby="basic-addon2" value="' + text + '"><span class="input-group-addon">저장</span></div>');
+				content.find('input').focus();
+				content.find('span').on('click', function()
+				{
+					var value = $(this).prev().val();
+					$.ajax({url : '/api/comments/' + _id, type: 'put', data: {content : value}}).done(function(result)
+					{
+						content.html(value);
+					}).fail(function(error)
+					{
+						alert('작성실패');
+						console.error(error);
+					});
+				});
+			});
+			
+			$('.comment-author .delete').on('click', function()
+			{
+				var _id = $(this).attr('data-id');
+				var content = $(this).parent().parent().find('.comment-content');
+				
+				if(confirm('삭제하시겠습니까?'))
+				{
+					$.ajax({url : '/api/comments/' + _id, type: 'delete'}).done(function(result)
+					{
+						content.parent().remove();
+					}).fail(function(error)
+					{
+						alert('삭제실패');
+						console.error(error);
+					});
+				}
+			});
 		}
 		else
 		{
@@ -258,7 +323,7 @@ function bindComments()
 	}).fail(function(error)
 	{
 		$('.container').html(error);
-	});	
+	});
 }
 
 function getDate(d)

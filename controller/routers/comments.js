@@ -28,6 +28,16 @@ module.exports = function(app)
 			if(err)
 				return res.status(500).send({error: err});
 			
+			for(var i=0; i<list.length; i++)
+			{
+				if(list[i].author == req.session.user.username)
+					list[i].isOwn = true;
+				else
+					list[i].isOwn = false;
+				
+				console.log('흠 : ', list[i]);
+			}
+			
 	        res.status(200).send(list);
 	    });
 	}));
@@ -36,7 +46,6 @@ module.exports = function(app)
 	{
 		var comment = new Comment(req.body);
 		comment.author = req.session.user.username;
-		comment.isOwn = true;
 		
 		comment.save(function(err)
 	    {

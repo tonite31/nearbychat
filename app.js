@@ -15,7 +15,7 @@ global._path =
 	controller : __dirname + '/controller',
 	views : __dirname + '/views',
 	libs : __dirname + '/libs',
-	uploads : __dirname + '/uploads'
+	uploads : __dirname + '/../uploads'
 };
 
 /**
