@@ -111,6 +111,8 @@ module.exports = function(app)
 		        	if(Post.schema.tree.hasOwnProperty(key))
 		        		item[key] = req.body[key];
 		        }
+	        	
+	        	item.published_date = new Date();
 		 
 		        item.save(function(err)
 		        {

@@ -22,15 +22,16 @@ $(document).ready(function()
 				
 			}).fail(function(res)
 			{
-				if(res.status == 404 && res.responseText == 'not_found')
-				{
-					$('input[name="passwordConfirm"]').parent().show();
-					$('#signin').text('등록 후 로그인').attr('data-type', 'signup');
-				}
-				else
-				{
+//				if(res.status == 404 && res.responseText == 'not_found')
+//				{
+//					$('input[name="passwordConfirm"]').parent().show();
+//					$('#signin').text('등록 후 로그인').attr('data-type', 'signup');
+//				}
+//				else
+//				{
 					console.log(res);
-				}
+					alert('존재하지 않는 아이디');
+//				}
 			});
 		});
 	});
