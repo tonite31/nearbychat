@@ -77,9 +77,8 @@ $(document).ready(function()
 			var date_a = new Date(a.published_date);
 			var date_b = new Date(b.published_date);
 			
-			return date_a.getTime() < date_b.getTime() ? 1 : 0;
+			return date_b.getTime() - date_a.getTime();
 		});
-		
 
 		var today = new Date().getTime();
 
@@ -152,7 +151,7 @@ $(document).ready(function()
 <body>
 <div class="container" style="margin-top: 50px;" id="mainContainer">
 	<div style="margin: 10px 0; text-align: right;">
-		<a href="/profile" class="btn btn-default" style="float: left;">프로필</a>
+<!-- 		<a href="/profile" class="btn btn-default" style="float: left;">프로필</a> -->
 		<a class="btn btn-default" href="/write">글쓰기</a>
 		<a class="btn btn-default" href="/logout">로그아웃</a>
 	</div>
