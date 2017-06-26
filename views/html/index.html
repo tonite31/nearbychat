@@ -60,8 +60,8 @@
 <script src="@{js/libs/jquery/jquery-3.1.1.min.js}"></script>
 
 <script type="text/template" id="listItemTemplate">
-<tr>
-	<td><a href="/article?_id={_id}">{subject}</a></td>
+<tr id="{_id}">
+	<td>{new}<a href="/article?_id={_id}">{subject}</a></td>
 	<td class="author">{author}</td>
 	<td class="published-date">{published_date}</td>
 </tr>
@@ -72,28 +72,28 @@ $(document).ready(function()
 {
 	$.ajax({url : '/api/posts'}).done(function(data)
 	{
-		console.log(data.sort);
-		
 		data = data.sort(function(a, b)
 		{
 			var date_a = new Date(a.published_date);
 			var date_b = new Date(b.published_date);
 			
-			return date_a.getTime() < date_b.getTime();
+			return date_a.getTime() < date_b.getTime() ? 1 : 0;
 		});
 		
+
+		var today = new Date().getTime();
+
 		var template = $('#listItemTemplate').html();
 		var html = '';
 		for(var i=0; i<data.length; i++)
 		{
 			var t = template;
+			t = t.replace(/{_id}/gi, data[i]._id);
 			for(var key in data[i])
 			{
 				if(key == 'published_date')
 				{
 					var date = new Date(data[i][key]);
-					console.dir(date);
-					
 					var year = date.getFullYear();
 					var months = date.getMonth() + 1;
 					var dayOfMonth = date.getDate();
@@ -101,14 +101,24 @@ $(document).ready(function()
 					var min = date.getMinutes();
 					var sec = date.getSeconds();
 					
-					months = months > 10 ? months : '0' + months;
-					dayOfMonth = dayOfMonth > 10 ? dayOfMonth : '0' + dayOfMonth;
-					hour = hour > 10 ? hour : '0' + hour;
-					min = min > 10 ? min : '0' + min;
-					sec = sec > 10 ? sec : '0' + sec;
+					months = months >= 10 ? months : '0' + months;
+					dayOfMonth = dayOfMonth >= 10 ? dayOfMonth : '0' + dayOfMonth;
+					hour = hour >= 10 ? hour : '0' + hour;
+					min = min >= 10 ? min : '0' + min;
+					sec = sec >= 10 ? sec : '0' + sec;
 					
 					data[i][key] = year + '-' + months + '-' + dayOfMonth + ' ' + hour + ':' + min + ':' + sec;
-				}					
+
+					var tmp = (today - date.getTime()) / 60000;
+					if(tmp <= 60 * 12)
+					{
+						t = t.replace('{new}', '<img src="/views/imgs/ico-new.gif"> ');
+					}
+					else
+					{
+						t = t.replace('{new}', '');
+					}
+				}
 				
 				t = t.replace('{' + key + '}', data[i][key]);
 			}
@@ -117,6 +127,20 @@ $(document).ready(function()
 		}
 		
 		$('#articleList').html(html);
+
+		$('#articleList tr').each(function()
+		{
+			var that = this;
+			var id = $(this).attr('id');
+			$.ajax({url : '/api/comments/' + id}).done(function(result)
+			{
+				var td = $(that).find('td:first a');
+				td.text(td.text() + ' [' + result.length + ']');
+			}).fail(function(error)
+			{
+				$('#mainContainer').html(error);
+			});
+		});
 	}).fail(function(error)
 	{
 		$('#mainContainer').html(error);

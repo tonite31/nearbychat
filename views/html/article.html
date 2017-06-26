@@ -235,6 +235,8 @@ function bindPoints()
 				star += '☆';
 			}
 			
+			average *= 10;
+			average = parseInt(average) / 10;
 			$('.point-average').html(star + ' (' + average + '점)');
 		}
 		else
@@ -384,6 +386,9 @@ function getDate(d)
 			<div class="input-group">
 				<input type="text" class="form-control" placeholder="덧글입력" aria-describedby="basic-addon2">
 				<span class="input-group-addon" id="save-comment">저장</span>
+			</div>
+			<div style="text-align: right; margin-top: 10px;">
+				<a href="/" class="btn btn-default">목록으로</a>
 			</div>
 		</div>
 	</div>
